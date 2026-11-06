@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 from helper import *
+import matplotlib.image
 
 
 def show_images(data):
@@ -14,15 +15,12 @@ def show_images(data):
         Do not return any arguments. Save the plots to 'image_1.*' and 'image_2.*' and
         include them in your report
     """
-    ### YOUR CODE HERE
-
-
-
-    ### END YOUR CODE
+    matplotlib.image.imsave('image_1.png', data[0,:,:])
+    matplotlib.image.imsave('image_2.png', data[1,:,:])
 
 
 def show_features(X, y, save=True):
-    """Plot a 2-D scatter plot in the feature space and save it. 
+    """Plot a 2-D scatter plot in the feature space and save it.
 
     Args:
         X: An array of shape [n_samples, n_features].
@@ -33,17 +31,20 @@ def show_features(X, y, save=True):
         Do not return any arguments. Save the plot to 'train_features.*' and include it
         in your report.
     """
-    ### YOUR CODE HERE
-
-
-
-    ### END YOUR CODE
+    for i in range(len(y)-1):
+        if y[i] == 1:
+            plt.scatter(X[i,0], X[i,1], marker='*', c='red')
+        else:
+            plt.scatter(X[i,0], X[i,1], marker='+', c='blue')
+    if save:
+        plt.savefig('train_features.png')
 
 
 class Perceptron(object):
-    
+
     def __init__(self, max_iter):
         self.max_iter = max_iter
+        self.W = np.zeros(3)
 
     def fit(self, X, y):
         """Train perceptron model on data (X,y).
@@ -55,14 +56,10 @@ class Perceptron(object):
         Returns:
             self: Returns an instance of self.
         """
-        ### YOUR CODE HERE
-        
-
-        # After implementation, assign your weights w to self as below:
-        # self.W = w
-        
-        ### END YOUR CODE
-        
+        for _ in range(self.max_iter):
+            for input, label in zip(X, y):
+                y_cap = self.predict(input)
+                self.W += 0.01 * (label - y_cap) * input
         return self
 
     def get_params(self):
@@ -85,11 +82,12 @@ class Perceptron(object):
         Returns:
             preds: An array of shape [n_samples,]. Only contains 1 or -1.
         """
-        ### YOUR CODE HERE
-
-
-
-        ### END YOUR CODE
+        result = np.dot(X, self.W)
+        if result > 0:
+            group = 1
+        else:
+            group = -1
+        return group
 
     def score(self, X, y):
         """Returns the mean accuracy on the given test data and labels.
@@ -101,34 +99,38 @@ class Perceptron(object):
         Returns:
             score: An float. Mean accuracy of self.predict(X) wrt. y.
         """
-        ### YOUR CODE HERE
-
-
-
-        ### END YOUR CODE
-
-
+        count = 0
+        for i in range(len(y)-1):
+            result = np.dot(X[i], self.W)
+            if result > 0 and y[i] == 1:
+                count += 1
+            elif result < 0 and y[i] == -1:
+                count += 1
+        return count / len(y)
 
 
 def show_result(X, y, W):
-    """Plot the linear model after training. 
+    """Plot the linear model after training.
        You can call show_features with 'save' being False for convenience.
 
     Args:
         X: An array of shape [n_samples, 2].
         y: An array of shape [n_samples,]. Only contains 1 or -1.
         W: An array of shape [n_features,].
-    
+
     Returns:
         Do not return any arguments. Save the plot to 'result.*' and include it
         in your report.
     """
-    ### YOUR CODE HERE
-
-
-
-    ### END YOUR CODE
-
+    for i in range(len(y)-1):
+        if y[i] == 1:
+            plt.scatter(X[i,0], X[i,1], marker='*', c='red')
+        else:
+            plt.scatter(X[i,0], X[i,1], marker='+', c='blue')
+    x_ticks = np.linspace(-0.4, -0.2, 1000)
+    y_ticks = -x_ticks*(W[1]/W[2]) - (W[0]/W[2])
+    plt.plot(x_ticks, y_ticks)
+    plt.savefig('result.png')
 
 
 def test_perceptron(max_iter, X_train, y_train, X_test, y_test):
